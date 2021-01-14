@@ -1,5 +1,5 @@
 {
-    "name": "c24/console",
+    "name": "werfux/console",
     "description": "A collection of commandline commands to unify that usage.",
     "type": "library",
     "require": {
