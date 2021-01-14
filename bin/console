@@ -1,0 +1,22 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+if (PHP_SAPI !== 'cli') {
+    echo "It is required to run this from commandline.";
+    die();
+}
+
+require_once __DIR__ . '/../vendor/autoload.php';
+
+use Console24\Application;
+
+try {
+    $application = new Application();
+    $application->run();
+} catch (\Exception $e) {
+    echo "Unable to run console application." . "\n";
+    echo "ERROR: " . $e->getMessage() . "\n";
+    die();
+}

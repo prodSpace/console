@@ -1,0 +1,17 @@
+{
+    "name": "c24/console",
+    "description": "A collection of commandline commands to unify that usage.",
+    "type": "library",
+    "require": {
+        "php": ">=7.4",
+        "symfony/console": "^5.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Console\\": "src/"
+        }
+    },
+    "bin": [
+      "bin/console"
+    ]
+}
