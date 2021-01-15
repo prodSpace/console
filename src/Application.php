@@ -2,7 +2,8 @@
 
 namespace Console;
 
-use Composer\Autoload\ClassLoader;
+use Console\Command\Ip\LanCommand;
+use Console\Command\Ip\WebCommand;
 use Console\Command\TestCommand;
 
 use Symfony\Component\Console\Application as ConsoleApplication;
@@ -23,6 +24,8 @@ class Application extends ConsoleApplication
         parent::__construct($name, $version);
         $this->registerCommandsByComposer();
         $this->add(new TestCommand());
+        $this->add(new WebCommand());
+        $this->add(new LanCommand());
 
         //Built-In Commands
         //get your-ip
@@ -56,6 +59,7 @@ class Application extends ConsoleApplication
         //time
     }
 
+    //@TODO register bundled commands
     /**
      * @return array
      */

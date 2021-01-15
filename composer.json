@@ -1,10 +1,11 @@
 {
-    "name": "prodSpace/console",
+    "name": "prodspace/console",
     "description": "A collection of commandline commands to unify that usage.",
     "type": "library",
     "require": {
         "php": ">=7.4",
-        "symfony/console": "^5.2"
+        "symfony/console": "^5.2",
+        "symfony/http-client": "^5.2"
     },
     "autoload": {
         "psr-4": {
