@@ -1,5 +1,5 @@
 {
-    "name": "werfux/console",
+    "name": "prodSpace/console",
     "description": "A collection of commandline commands to unify that usage.",
     "type": "library",
     "require": {
