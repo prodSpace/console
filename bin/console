@@ -8,9 +8,20 @@ if (PHP_SAPI !== 'cli') {
     die();
 }
 
-require_once __DIR__ . '/../vendor/autoload.php';
+$vendorDirectory = dirname(__DIR__, 3) .'/autoload.php';
 
-use Console24\Application;
+if (!file_exists($vendorDirectory)) {
+  $vendorDirectory = dirname(__DIR__, 1) .'/vendor/autoload.php';
+
+  if (!file_exists($vendorDirectory)) {
+    print 'ERROR: Cannot find composer autoload.php.';
+    die;
+  }
+}
+
+require_once $vendorDirectory;
+
+use Console\Application;
 
 try {
     $application = new Application();
@@ -20,3 +31,4 @@ try {
     echo "ERROR: " . $e->getMessage() . "\n";
     die();
 }
+
