@@ -13,6 +13,7 @@ class CommandRegistry
     /**
      * @param Application $application
      * @throws \JsonException
+     * @throws \ReflectionException
      */
     public static function register(Application $application): void
     {
@@ -24,7 +25,7 @@ class CommandRegistry
      * This method registers commands that are bundled with this console application.
      *
      * @param Application $application
-     * @throws \Exception
+     * @throws \ReflectionException
      */
     private static function registerBundledCommands(Application $application): void
     {
@@ -36,6 +37,7 @@ class CommandRegistry
     /**
      * @param Application $application
      * @throws \JsonException
+     * @throws \ReflectionException
      */
     private static function registerAppCommands(Application $application): void
     {
