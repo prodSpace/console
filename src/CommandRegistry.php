@@ -4,13 +4,10 @@ declare(strict_types=1);
 
 namespace ProdSpace\Console;
 
-use ProdSpace\Console\Command\Ip\LanCommand;
-use ProdSpace\Console\Command\Ip\WebCommand;
-use ProdSpace\Console\Command\String\RandomCommand;
-use ProdSpace\Console\Command\TestCommand;
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Yaml\Yaml;
-
+/**
+ * Class CommandRegistry
+ * @package ProdSpace\Console
+ */
 class CommandRegistry
 {
     /**
@@ -20,7 +17,7 @@ class CommandRegistry
     public static function register(Application $application): void
     {
         self::registerBundledCommands($application);
-        //self::registerAppCommands($application);
+        self::registerAppCommands($application);
     }
 
     /**
@@ -31,53 +28,41 @@ class CommandRegistry
      */
     private static function registerBundledCommands(Application $application): void
     {
-        if ($commandInstances = self::loadCommandInstances(__DIR__ . '/Command')) {
-            self::registerCommandInstances($application, $commandInstances);
+        if ($commandClassNames = self::loadCommandClassNames(__DIR__, __NAMESPACE__)) {
+            self::registerCommandInstances($application, $commandClassNames);
         }
     }
 
-//    private static function registerAppCommands(Application $application): void
-//    {
-//        $composerBasedNameSpaces = self::getComposerNamespaces();
-//
-//        $composerFile = dirname(__DIR__, 4) . '/composer.json';
-//
-//        if (file_exists($composerFile)) {
-//            $composerFileString = file_get_contents($composerFile);
-//            $composerFileContent = json_decode($composerFileString, true, 512, JSON_THROW_ON_ERROR);
-//
-//            $psr0Namespaces = $composerFileContent['autoload']['psr-0'] ?? null;
-//            $psr4Namespaces = $composerFileContent['autoload']['psr-4'] ?? null;
-//
-//            foreach ($psr4Namespaces as $namespace => $folder) {
-//                if ($commandDirectory = self::getCommandDirectory($folder)) {
-//                    $commandNamespace = sprintf('%sCommand', $namespace);
-//                    $commandClasses = self::getCommandClassNames($commandDirectory, $commandNamespace);
-//
-//                    $commandInstances = self::getCommandInstances($commandClasses);
-//                    foreach ($commandInstances as $commandInstance) {
-//                        $application->add($commandInstance);
-//                    }
-//                }
-//            }
-//        }
-//    }
+    /**
+     * @param Application $application
+     * @throws \JsonException
+     */
+    private static function registerAppCommands(Application $application): void
+    {
+        $composerBasedNameSpaces = self::getComposerSourceDirectories();
+
+        foreach ($composerBasedNameSpaces as $namespace => $directory) {
+            if ($commandClassNames = self::loadCommandClassNames($directory, $namespace)) {
+                self::registerCommandInstances($application, $commandClassNames);
+            }
+        }
+    }
 
     /**
      * @param string $directoryPath
      * @return array
      * @throws \Exception
      */
-    private static function loadCommandInstances(string $directoryPath): ?array
+    private static function loadCommandClassNames(string $directoryPath, string $namespace): ?array
     {
         if (file_exists($directoryPath) && is_dir($directoryPath)) {
-            $directory = new \RecursiveDirectoryIterator(__DIR__ . '/Command');
+            $directory = new \RecursiveDirectoryIterator($directoryPath);
             $iterator = new \RecursiveIteratorIterator($directory);
             $regex = new \RegexIterator($iterator, '/Command\.php/');
 
-            return array_map(static function (string $commandFile) {
-                $className = str_replace([__DIR__, '/', '.php'], [__NAMESPACE__, '\\', ''], $commandFile);
-                return (new $className());
+            return array_map(static function (string $commandFile) use ($directoryPath, $namespace) {
+                $trimmedNamespace = rtrim($namespace, '\\');
+                return str_replace([$directoryPath, '/', '.php'], [$trimmedNamespace, '\\', ''], $commandFile);
             }, iterator_to_array($regex));
         }
 
@@ -86,12 +71,16 @@ class CommandRegistry
 
     /**
      * @param Application $application
-     * @param array $commandInstances
+     * @param array $commandClassNames
+     * @throws \ReflectionException
      */
-    private static function registerCommandInstances(Application $application, array $commandInstances): void
+    private static function registerCommandInstances(Application $application, array $commandClassNames): void
     {
-        array_walk($commandInstances, static function (Command $command) use ($application) {
-            $application->add($command);
+        array_walk($commandClassNames, function (string $commandClass) use ($application) {
+            if (class_exists($commandClass)) {
+                $commandInstance = call_user_func_array([new \ReflectionClass($commandClass), 'newInstance'], []);
+                $application->add($commandInstance);
+            }
         });
     }
 
@@ -99,7 +88,7 @@ class CommandRegistry
      * @return array|null
      * @throws \JsonException
      */
-    private static function getComposerNamespaces(): ?array
+    private static function getComposerSourceDirectories(): ?array
     {
         $composerFile = dirname(__DIR__, 4) . '/composer.json';
 
@@ -111,25 +100,12 @@ class CommandRegistry
             $psr4Namespaces = $composerFileContent['autoload']['psr-4'] ?? [];
 
             if (!empty($psr0Namespaces) || !empty($psr4Namespaces)) {
-                return array_merge($psr0Namespaces, $psr4Namespaces);
+                return array_map(static function (string $folder) {
+                    $projectRoot = dirname(__DIR__, 4);
+                    $trimmedFolder = trim($folder, '/');
+                    return sprintf('%s/%s', $projectRoot, $trimmedFolder);
+                }, array_merge($psr0Namespaces, $psr4Namespaces));
             }
-        }
-
-        return null;
-    }
-
-    /**
-     * @param string $folder
-     * @return string
-     */
-    private static function getCommandDirectory(string $folder): ?string
-    {
-        $projectRoot = dirname(__DIR__, 4);
-        $trimmedFolder = trim($folder, '/');
-        $commandDirectory = sprintf('%s/%s/Command', $projectRoot, $trimmedFolder);
-
-        if (file_exists($commandDirectory) && is_dir($commandDirectory)) {
-            return $commandDirectory;
         }
 
         return null;
