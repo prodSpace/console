@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Console\Base;
+namespace ProdSpace\Console\Base;
 
 
 use Symfony\Component\HttpClient\HttpClient;

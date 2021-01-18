@@ -4,12 +4,21 @@
     "type": "library",
     "require": {
         "php": ">=7.4",
+        "ext-json": "*",
         "symfony/console": "^5.2",
-        "symfony/http-client": "^5.2"
+        "symfony/http-client": "^5.2",
+        "symfony/yaml": "^5.2"
     },
     "autoload": {
         "psr-4": {
-            "Console\\": "src/"
+            "ProdSpace\\Console\\": "src/"
+        }
+    },
+    "extra": {
+        "prodspace": {
+            "console": {
+                "foo": "bar"
+            }
         }
     },
     "bin": [

@@ -1,15 +1,17 @@
 <?php
 
+declare(strict_types=1);
 
-namespace Console\Command;
+namespace ProdSpace\Console\Command;
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * Class TestCommand
- * @package Console\Command
+ * @package ProdSpace\Console\Command
  */
 class TestCommand extends Command
 {
@@ -28,6 +30,7 @@ class TestCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
+
             $output->writeln('Testrun finished!');
 
             return Command::SUCCESS;

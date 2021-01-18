@@ -21,7 +21,7 @@ if (!file_exists($vendorDirectory)) {
 
 require_once $vendorDirectory;
 
-use Console\Application;
+use ProdSpace\Console\Application;
 
 try {
     $application = new Application();
